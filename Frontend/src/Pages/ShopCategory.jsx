@@ -38,14 +38,3 @@ else{
     </div>
   )
 }
-
-// import React from 'react'
-
-// export default function ShopCategory() {
-//   return (
-//     <div>
-//       Shop Catogory
-//     </div>
-//   )
-// }
-

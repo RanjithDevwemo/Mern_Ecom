@@ -10,19 +10,19 @@ const ProductDisplay = (props) => {
     <div className='productdisplay'>
       <div className="productdisplay-left">
         <div className="productdisplay-img-list">
-           <img src={product.image} alt="no-image" />
-           <img src={product.image} alt="no-image" />
+           <img src={product.image} alt="no-image" height={200} width={200}/>
+           {/* <img src={product.image} alt="no-image" /> */}
         </div>
 
         <div className="productdisplay-image">
-            <img className='productdisplay-main-img' src={product.image} alt="" />
+            <img className='productdisplay-main-img' src={product.image} alt="" height={400} width={400}/>
         </div>
 
       </div>
       <div className="productdisplay-right">
 <h1>{product.name}</h1>
 <div className="productdisplay-right-star">
-    <img src={star_icon} alt="" />
+    <img src={star_icon} alt=""  />
     <img src={star_icon} alt="" />
     <img src={star_icon} alt="" />
     <img src={star_icon} alt="" />

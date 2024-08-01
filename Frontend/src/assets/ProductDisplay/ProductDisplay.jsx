@@ -90,16 +90,22 @@
 
 
 
+
+
+
 import React, { useContext, useState } from 'react';
 import './ProductDisplay.css';
 import star_icon from '../Assets/star_icon.png';
 import star_dull_icon from '../Assets/star_dull_icon.png';
 import { ShopContext } from '../../Context/ShopContext';
 
+
 const ProductDisplay = (props) => {
     const { product } = props;
-    const { addToCart } = useContext(ShopContext);
+    const { addToCart,setCartItems } = useContext(ShopContext);
     const [quantity, setQuantity] = useState(1);
+
+    console.log(product);
 
     const increaseQuantity = () => {
         if (quantity < product.stock) {
@@ -153,7 +159,9 @@ const ProductDisplay = (props) => {
                     <input
                         type="number"
                         value={quantity}
-                        onChange={e => setQuantity(Math.max(1, Math.min(product.stock, Number(e.target.value))))}
+                        onChange={e => setQuantity(Math.max(1, Math.min(product.stock, Number(e.target.value)))) 
+                            
+                        }
                         min="1"
                         max={product.stock}
                     />
@@ -163,6 +171,7 @@ const ProductDisplay = (props) => {
                 </div>
                 <p className="productdisplay-right-category"><span>Category:</span> {product.category}</p>
             </div>
+           
         </div>
     );
 }

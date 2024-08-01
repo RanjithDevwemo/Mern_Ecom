@@ -9,6 +9,7 @@ import LoginSignup from './Pages/LoginSignup'
 import men_banner from "./assets/Assets/banner_mens.png"
 import women_banner from "./assets/Assets/banner_women.png"
 import kid_banner from "./assets/Assets/banner_kids.png"
+import OrderProceed from './orderProduct/OrderProduct'
 function App() {
 
 
@@ -26,7 +27,7 @@ function App() {
       </Route>
       <Route path='/cart' element={<Cart/>}/>
       <Route path='/login' element={<LoginSignup/>}/>
-
+      <Route path='/order' element={<OrderProceed/>}/>
     </Routes>
     </BrowserRouter>
     </>

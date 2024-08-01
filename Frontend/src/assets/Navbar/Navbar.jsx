@@ -8,9 +8,10 @@ import { IoSearchSharp } from "react-icons/io5";
 import { ShopContext } from '../../Context/ShopContext';
 
 function Navbar() {
+
    // const [search,setSearch]=useState("");
     const [menu, setMenu] = useState("shop");
-    const { getTotalCartItems,  fetchProducts,searchTerm, handleSearchChange ,handleSearchChangeClick } = useContext(ShopContext);
+    const { getTotalCartItems, handleSearchChange ,handleSearchChangeClick } = useContext(ShopContext);
 
   return (
     <div className='navbar'>

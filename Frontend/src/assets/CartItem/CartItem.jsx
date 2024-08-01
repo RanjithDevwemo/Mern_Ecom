@@ -1,5 +1,5 @@
 // import { ShopContext } from '../../Context/ShopContext';
-
+import { Link } from "react-router-dom";
 import "./CartItems.css"
 import { useContext } from 'react';
 import remove_icon from '../Assets/cart_cross_icon.png';
@@ -21,8 +21,8 @@ const CartItems = () => {
         all_product.map((item, i)=>{
             if(cartItems[item.id] > 0){
               
-                return <>
-                <div className="">
+                return <div key={i}>
+                <div className="" key={i}>
         <div className="classitems-format cartitems-format-main">
             <img src={item.image} className='carticon-product-icon' alt="" />
             <p>{item.name}</p>
@@ -33,7 +33,7 @@ const CartItems = () => {
         </div>
         <hr />
       </div>
-                </>
+                </div>
             }
             return null;
         })}
@@ -54,7 +54,13 @@ const CartItems = () => {
                     <hr />
                     <div className="cartitems-total-item">
                         <h3>Total</h3>
+                        
                         <h3>${getTotalCartAmount()}</h3>
+                    
+                    </div>
+                    <div className="cartitems-total-item">
+                        <h3></h3>
+                    <button><Link to={'/order'}> Proceed to order </Link></button>
                     </div>
                 </div>
               

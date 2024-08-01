@@ -7,7 +7,8 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
-const bcrypt=require("bcrypt")
+const bcrypt=require("bcrypt");
+// const { type } = require('os');
 // Middleware
 
 app.use(cors());
@@ -185,54 +186,15 @@ const fetchUser = async (req, res, next) => {
 
 
 // Add to Cart Endpoint (Requires Authentication)
-app.post("/addtocart", fetchUser, async (req, res) => {
-    try {
-        let userData = await User.findOne({ _id: req.user.id });
-        userData.cartData[req.body.itemId] += 1;
-        await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
-        res.send("Item added to cart");
-    } catch (error) {
-        console.error("Error adding to cart:", error.message);
-        res.status(500).json({ error: "Failed to add item to cart" });
-    }
-});
-
-
-
-// Add to Cart Endpoint (Requires Authentication)
 // app.post("/addtocart", fetchUser, async (req, res) => {
-//     const { productId, quantity } = req.body;
+//     const {quantity } = req.body;
+//     // console.log(productId,quantity);
 
-//     console.log(productId,quantity);
 //     try {
-//         const product = await Product.findOne({ id: productId });
-//         if (!product) {
-//             return res.status(404).json({ error: "Product not found" });
-//         }
-
-//         if (product.stock < quantity) {
-//             return res.status(400).json({ error: "Not enough stock available" });
-//         }
-
-//         // Update product stock
-//         product.stock -= quantity;
-//         await product.save();
-
-//         let user = await User.findOne({ _id: req.user.id });
-//         if (!user) {
-//             return res.status(404).json({ error: "User not found" });
-//         }
-
-//         // Update cart data
-//         if (user.cartData[productId]) {
-//             user.cartData[productId] += quantity;
-//         } else {
-//             user.cartData[productId] = quantity;
-//         }
-
-//         await user.save(); // Save the updated user document
-
-//         res.status(200).json(user.cartData);
+//         let userData = await User.findOne({ _id: req.user.id });
+//         userData.cartData[req.body.itemId] += quantity;
+//         await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
+//         res.send("Item added to cart");
 //     } catch (error) {
 //         console.error("Error adding to cart:", error.message);
 //         res.status(500).json({ error: "Failed to add item to cart" });
@@ -242,7 +204,39 @@ app.post("/addtocart", fetchUser, async (req, res) => {
 
 
 
-// Remove from Cart Endpoint (Requires Authentication)
+
+app.post("/addtocart", fetchUser, async (req, res) => {
+    const {quantity } = req.body;
+    // console.log(productId,quantity);
+    // const productId=req.body;
+    // console.log(productId);
+    // const val=Object.values(productId);
+    // const productId=val[0];
+    // console.log(productId);
+
+    try {
+        let userData = await User.findOne({ _id: req.user.id });
+        if (userData) {
+        
+          
+        
+        userData.cartData[req.body.itemId] += quantity;
+        await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
+
+        // await Product.findOneAndUpdate({_id:req.product.id},{stock:product.stock})
+        res.send("Item added to cart");
+        }
+        else{
+            res.send("please first signup")
+        }
+    } catch (error) {
+        console.error("Error adding to cart:", error.message);
+        res.status(500).json({ error: "Failed to add item to cart" });
+    }
+});
+
+
+
 app.post("/removefromcart", fetchUser, async (req, res) => {
     try {
         let userData = await User.findOne({ _id: req.user.id });
@@ -337,12 +331,58 @@ const fetchAdmin = async (req, res, next) => {
     }
 }
 
-// Example Admin Endpoint (Requires Authentication)
-app.get('/admin/someendpoint', fetchAdmin, (req, res) => {
-    res.send("Admin authenticated successfully");
+
+  
+// Order Schema
+
+const Order= mongoose.model("order",{
+
+    username:{type:String,required:true},
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Users',
+        required: true,
+      },
+      totalproduct:{type:Number,require:true},
+      total:{type:Number,required:true},
+      date:{type:Date,default:Date.now}
+})
+
+//User's Order Product Details
+
+app.post("/order/products", async (req, res) => {
+    try {
+        // Validate the request body
+        const { username, userId,totalproduct, total } = req.body;
+
+       
+
+        // Create and save the order
+        const order = new Order({
+            username,
+            userId,
+            totalproduct,
+            total
+        });
+
+        await order.save();
+
+        console.log("Product order successfully created:", order);
+        res.json({
+            success: true,
+            message: "Product order successfully created.",
+            order
+        });
+    } catch (error) {
+        console.error("Product order error:", error);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while creating the order."
+        });
+    }
 });
-  
-  
+
+
 
 // Server Listening
 app.listen(port, () => {

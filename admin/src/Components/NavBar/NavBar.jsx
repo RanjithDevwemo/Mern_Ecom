@@ -1,13 +1,33 @@
-import React from 'react'
-import "./NavBar.css"
-import navlogo from "../../assets/nav-logo.svg"
-import navProfile from "../../assets/nav-profile.svg"
 
-export default function NavBar() {
+
+import { Link } from 'react-router-dom';
+
+function Navbar() {
+
   return (
     <div className='navbar'>
-      <img src={navlogo} alt="" className='nav-logo' />
-      <img src={navProfile} alt="" />
+     <div className="nav-logo">
+      <h2>Admin</h2>
+     </div>
+
+<div className="search">
+   <form action="">
+   {/* <input type="text" placeholder='Search Text' onChange={handleSearchChange}  /><IoSearchSharp/> */}
+  
+   </form>
+</div>
+<Link to={"/admindashboard"} >Home</Link>
+
+
+     <div className="nav-login-cart">
+      {
+         localStorage.getItem('auth-token') ? <button onClick={()=> { localStorage.removeItem('auth-token'); window.location.replace("/login")}}>logout</button> : <Link to={'/login'}><button className="login">Login</button></Link>
+      }
+        
+     
+     </div>
     </div>
   )
 }
+
+export default Navbar

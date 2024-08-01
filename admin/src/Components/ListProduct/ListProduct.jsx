@@ -19,7 +19,7 @@ const ListProduct = () => {
       console.error('Error fetching data:', error);
     }
   };
-
+console.log(allProducts);
   // Fetch data on component mount
   useEffect(() => {
     fetchInfo();
@@ -44,6 +44,7 @@ const ListProduct = () => {
         <p>Old Price</p>
         <p>New Price</p>
         <p>Category</p>
+        <p>Stock</p>
         <p>Remove</p>
       </div>
 
@@ -56,6 +57,7 @@ const ListProduct = () => {
             <p>$ {product.old_price}</p>
             <p>$ {product.new_price}</p>
             <p>{product.category}</p>
+            <p>{product.stock}</p>
             <img
               src={cross_icon}
               onClick={() => remove_product(product._id)}

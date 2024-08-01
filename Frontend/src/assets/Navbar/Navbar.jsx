@@ -3,17 +3,14 @@ import { useContext, useState } from 'react';
 import './Navbar.css';
 import logo from "../Assets/logo.png";
 import cart_icon from "../Assets/cart_icon.png"
-
 import { Link } from 'react-router-dom';
 import { IoSearchSharp } from "react-icons/io5";
 import { ShopContext } from '../../Context/ShopContext';
 
-
 function Navbar() {
    // const [search,setSearch]=useState("");
     const [menu, setMenu] = useState("shop");
-    const { getTotalCartItems } = useContext(ShopContext);
- 
+    const { getTotalCartItems,  fetchProducts,searchTerm, handleSearchChange ,handleSearchChangeClick } = useContext(ShopContext);
 
   return (
     <div className='navbar'>
@@ -29,7 +26,7 @@ function Navbar() {
      </ul>
 <div className="search">
    <form action="">
-   <input type="text" placeholder='Search Text' /><IoSearchSharp/>
+   <input type="text" placeholder='Search Text' onChange={handleSearchChange}  /><IoSearchSharp onClick={handleSearchChangeClick}/>
   
    </form>
 </div>

@@ -20,7 +20,9 @@ ${props.new_price}
 </div>
 
       </div>
-
+<div className="stock">
+  <h4>Stock : {props.stock}</h4>
+</div>
     </div>
   )
 }

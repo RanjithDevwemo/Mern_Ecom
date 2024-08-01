@@ -10,7 +10,8 @@ export default function AddProduct() {
         image:"",
         category:"women",
         new_price:"",
-        old_price:""
+        old_price:"",
+        stock:"",
     })
 
     const changeHandler=(e)=>{
@@ -68,6 +69,11 @@ if(responseData.success){
             <input value={productDetails.new_price} onChange={changeHandler} type="text" name='new_price' placeholder='type here' />
         </div>
 
+        <div className="addproduct-itemfield">
+            <p>Product Stocks</p>
+            <input value={productDetails.stock} onChange={changeHandler} type="number" name='stock' placeholder='type here' />
+        </div>
+
       </div>
       <div className="addproduct-itemfield">
         <p>Product Category</p>
@@ -88,3 +94,4 @@ if(responseData.success){
     </div>
   )
 }
+

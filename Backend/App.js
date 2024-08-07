@@ -184,56 +184,66 @@ const fetchUser = async (req, res, next) => {
 
 
 
-
 // Add to Cart Endpoint (Requires Authentication)
-// app.post("/addtocart", fetchUser, async (req, res) => {
-//     const {quantity } = req.body;
-//     // console.log(productId,quantity);
-
-//     try {
-//         let userData = await User.findOne({ _id: req.user.id });
-//         userData.cartData[req.body.itemId] += quantity;
-//         await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
-//         res.send("Item added to cart");
-//     } catch (error) {
-//         console.error("Error adding to cart:", error.message);
-//         res.status(500).json({ error: "Failed to add item to cart" });
-//     }
-// });
-
-
-
-
-
 app.post("/addtocart", fetchUser, async (req, res) => {
-    const {quantity } = req.body;
-    // console.log(productId,quantity);
-    // const productId=req.body;
-    // console.log(productId);
-    // const val=Object.values(productId);
-    // const productId=val[0];
-    // console.log(productId);
-
+    const { itemId, quantity } = req.body; // Expecting itemId and quantity in the request body
+console.log(itemId,quantity);
     try {
+        // Find the user
         let userData = await User.findOne({ _id: req.user.id });
-        if (userData) {
-        
-          
-        
-        userData.cartData[req.body.itemId] += quantity;
+
+        if (!userData) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Update cart data
+        if (!userData.cartData[itemId]) {
+            userData.cartData[itemId] = 0;
+        }
+        userData.cartData[itemId] += quantity;
+
+        // Save updated user data
         await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
 
-        // await Product.findOneAndUpdate({_id:req.product.id},{stock:product.stock})
-        res.send("Item added to cart");
-        }
-        else{
-            res.send("please first signup")
-        }
+        res.json({ success: true, message: "Item added to cart" });
     } catch (error) {
         console.error("Error adding to cart:", error.message);
         res.status(500).json({ error: "Failed to add item to cart" });
     }
 });
+
+
+
+
+// app.post("/addtocart", fetchUser, async (req, res) => {
+//     const {quantity } = req.body;
+//     // console.log(productId,quantity);
+//     // const productId=req.body;
+//     // console.log(productId);
+//     // const val=Object.values(productId);
+//     // const productId=val[0];
+//     // console.log(productId);
+
+//     try {
+//         let userData = await User.findOne({ _id: req.user.id });
+//         if (userData) {
+        
+          
+        
+//         userData.cartData[req.body.itemId] += quantity;
+//         await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
+
+//         // await Product.findOneAndUpdate({_id:req.product.id},{stock:product.stock})
+//         res.send("Item added to cart");
+//         }
+//         else{
+//             res.send("please first signup")
+//         }
+//     } catch (error) {
+//         console.error("Error adding to cart:", error.message);
+//         res.status(500).json({ error: "Failed to add item to cart" });
+//     }
+// });
 
 
 
@@ -337,7 +347,7 @@ const fetchAdmin = async (req, res, next) => {
 
 const Order= mongoose.model("order",{
 
-    username:{type:String,required:true},
+    
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Users',
@@ -348,46 +358,100 @@ const Order= mongoose.model("order",{
       date:{type:Date,default:Date.now}
 })
 
-//User's Order Product Details
 
-app.post("/order/products", async (req, res) => {
+
+// Endpoint to handle order creation without user authentication
+app.post('/order', async (req, res) => {
+    const {userId, cartData, totalProduct, totalAmount } = req.body;
+
     try {
-        // Validate the request body
-        const { username, userId,totalproduct, total } = req.body;
+        // Validate input
+        if (!userId || !cartData || !totalProduct || !totalAmount) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
 
-       
-
-        // Create and save the order
+        // Create an order
         const order = new Order({
-            username,
+           
             userId,
-            totalproduct,
-            total
+            totalProduct,
+          
+            total: totalAmount
         });
-
+console.log(order);
+        // Save the order
         await order.save();
 
-        console.log("Product order successfully created:", order);
-        res.json({
-            success: true,
-            message: "Product order successfully created.",
-            order
-        });
+        // Update stock for each product in the cart
+        for (const itemId in cartData) {
+            const quantity = cartData[itemId];
+            if (quantity > 0) {
+                const product = await Product.findById(itemId);
+                if (product) {
+                    if (product.stock < quantity) {
+                        return res.status(400).json({ error: `Insufficient stock for product ID ${itemId}` });
+                    }
+                    product.stock -= quantity;
+                    await product.save();
+                } else {
+                    return res.status(404).json({ error: `Product with ID ${itemId} not found` });
+                }
+            }
+        }
+
+        res.json({ success: true, message: "Order placed successfully" });
     } catch (error) {
-        console.error("Product order error:", error);
-        res.status(500).json({
-            success: false,
-            message: "An error occurred while creating the order."
-        });
+        console.error("Error placing order:", error.message);
+        res.status(500).json({ error: "Failed to place order" });
     }
 });
 
+
+
+
+
+
+// app.post("/order/product", fetchUser, async (req, res) => {
+//     const {totalproduct,total,id} = req.body;
+//     console.log(total,totalproduct,id);
+//     // console.log(productId,quantity);
+//     // const productId=req.body;
+//     // console.log(productId);
+//     // const val=Object.values(productId);
+//     // const productId=val[0];
+//     // console.log(productId);
+
+//     try {
+       
+//         let userData = await User.findOne({ _id: req.user.id });
+//         if (userData) {
+        
+          
+        
+//         userData.cartData[req.body.itemId] += quantity;
+//         await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
+
+//         // await Product.findOneAndUpdate({_id:req.product.id},{stock:product.stock})
+//         res.send("Item added to cart");
+//         }
+//         else{
+//             res.send("please first signup")
+//         }
+//     } catch (error) {
+//         console.error("Error adding to cart:", error.message);
+//         res.status(500).json({ error: "Failed to add item to cart" });
+//     }
+// });
 
 
 // Server Listening
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
+
+
+
+
 
 
 

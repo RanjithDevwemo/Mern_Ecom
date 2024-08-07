@@ -375,9 +375,11 @@ app.post('/order', async (req, res) => {
            
             userId,
             totalProduct,
-          
+          cartData,
             total: totalAmount
         });
+        console.log(cartData);
+        
 console.log(order);
         // Save the order
         await order.save();
@@ -385,8 +387,10 @@ console.log(order);
         // Update stock for each product in the cart
         for (const itemId in cartData) {
             const quantity = cartData[itemId];
+            console.log(itemId);
+            
             if (quantity > 0) {
-                const product = await Product.findById(itemId);
+                const product = await Product.findOne({id:itemId});
                 if (product) {
                     if (product.stock < quantity) {
                         return res.status(400).json({ error: `Insufficient stock for product ID ${itemId}` });

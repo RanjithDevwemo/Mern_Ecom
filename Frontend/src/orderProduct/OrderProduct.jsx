@@ -1,5 +1,3 @@
-
-
 import { useContext, useState, useEffect } from 'react';
 import "./orderProduct.css";
 import { ShopContext } from '../Context/ShopContext';
@@ -56,13 +54,11 @@ const decode1=jwtDecode(authToken);
             });
 
             // Notify user of success
+            window.location.reload();
             alert("Success: " + response.data.message);
             console.log(cartData);
             
 
-            // Optionally, clear the cart or redirect user after successful order
-            // clearCart(); 
-            // history.push('/order-success'); 
 
         } catch (err) {
             // Handle errors

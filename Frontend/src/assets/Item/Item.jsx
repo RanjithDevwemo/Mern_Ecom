@@ -22,6 +22,7 @@ ${props.new_price}
       </div>
 <div className="stock">
   <h4>Stock : {props.stock}</h4>
+  <p>{props.stock>0 ? <span style={{color:"green"}}>in-stock</span> :<span style={{color:"red"}}>out of stock</span> }</p>
 </div>
     </div>
   )

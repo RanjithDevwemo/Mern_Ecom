@@ -8,6 +8,7 @@ const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
 const bcrypt=require("bcrypt");
+const { type } = require('os');
 // const { type } = require('os');
 // Middleware
 
@@ -68,11 +69,11 @@ app.post('/addproduct:id', async (req, res) => {
             stock:req.body.stock,
         });
 
-console.log(quantity);
+// console.log(quantity);
 
 
        
-        console.log("Product Saved:", product);
+        // console.log("Product Saved:", product);
         res.json({ success: true, name: req.body.name });
     } catch (error) {
         console.error("Error adding product:", error.message);
@@ -187,7 +188,7 @@ const fetchUser = async (req, res, next) => {
 // Add to Cart Endpoint (Requires Authentication)
 app.post("/addtocart", fetchUser, async (req, res) => {
     const { itemId, quantity } = req.body; // Expecting itemId and quantity in the request body
-console.log(itemId,quantity);
+// console.log(itemId,quantity);
     try {
         // Find the user
         let userData = await User.findOne({ _id: req.user.id });
@@ -212,38 +213,6 @@ console.log(itemId,quantity);
     }
 });
 
-
-
-
-// app.post("/addtocart", fetchUser, async (req, res) => {
-//     const {quantity } = req.body;
-//     // console.log(productId,quantity);
-//     // const productId=req.body;
-//     // console.log(productId);
-//     // const val=Object.values(productId);
-//     // const productId=val[0];
-//     // console.log(productId);
-
-//     try {
-//         let userData = await User.findOne({ _id: req.user.id });
-//         if (userData) {
-        
-          
-        
-//         userData.cartData[req.body.itemId] += quantity;
-//         await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
-
-//         // await Product.findOneAndUpdate({_id:req.product.id},{stock:product.stock})
-//         res.send("Item added to cart");
-//         }
-//         else{
-//             res.send("please first signup")
-//         }
-//     } catch (error) {
-//         console.error("Error adding to cart:", error.message);
-//         res.status(500).json({ error: "Failed to add item to cart" });
-//     }
-// });
 
 
 
@@ -345,6 +314,7 @@ const fetchAdmin = async (req, res, next) => {
   
 // Order Schema
 
+
 const Order= mongoose.model("order",{
 
     
@@ -355,14 +325,17 @@ const Order= mongoose.model("order",{
       },
       totalproduct:{type:Number,require:true},
       total:{type:Number,required:true},
+      orderProducts:{type:Object,default:{}},
       date:{type:Date,default:Date.now}
 })
 
 
 
 // Endpoint to handle order creation without user authentication
+
+
 app.post('/order', async (req, res) => {
-    const {userId, cartData, totalProduct, totalAmount } = req.body;
+    const { userId, cartData, totalProduct, totalAmount } = req.body;
 
     try {
         // Validate input
@@ -372,25 +345,21 @@ app.post('/order', async (req, res) => {
 
         // Create an order
         const order = new Order({
-           
             userId,
             totalProduct,
-          cartData,
+            cartData,
             total: totalAmount
         });
-        console.log(cartData);
-        
-console.log(order);
+        // console.log(cartData);
+
         // Save the order
         await order.save();
 
         // Update stock for each product in the cart
         for (const itemId in cartData) {
             const quantity = cartData[itemId];
-            console.log(itemId);
-            
             if (quantity > 0) {
-                const product = await Product.findOne({id:itemId});
+                const product = await Product.findOne({ id: itemId });
                 if (product) {
                     if (product.stock < quantity) {
                         return res.status(400).json({ error: `Insufficient stock for product ID ${itemId}` });
@@ -403,7 +372,15 @@ console.log(order);
             }
         }
 
-        res.json({ success: true, message: "Order placed successfully" });
+        // Clear the user's cart data
+        await User.findOneAndUpdate(
+            { _id: userId },
+            { $set: { cartData: {} } }          //The $set operator used for replace the value 
+
+
+        );
+
+        res.json({ success: true, message: "Order placed successfully and cart cleared" });
     } catch (error) {
         console.error("Error placing order:", error.message);
         res.status(500).json({ error: "Failed to place order" });
@@ -414,41 +391,6 @@ console.log(order);
 
 
 
-
-// app.post("/order/product", fetchUser, async (req, res) => {
-//     const {totalproduct,total,id} = req.body;
-//     console.log(total,totalproduct,id);
-//     // console.log(productId,quantity);
-//     // const productId=req.body;
-//     // console.log(productId);
-//     // const val=Object.values(productId);
-//     // const productId=val[0];
-//     // console.log(productId);
-
-//     try {
-       
-//         let userData = await User.findOne({ _id: req.user.id });
-//         if (userData) {
-        
-          
-        
-//         userData.cartData[req.body.itemId] += quantity;
-//         await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
-
-//         // await Product.findOneAndUpdate({_id:req.product.id},{stock:product.stock})
-//         res.send("Item added to cart");
-//         }
-//         else{
-//             res.send("please first signup")
-//         }
-//     } catch (error) {
-//         console.error("Error adding to cart:", error.message);
-//         res.status(500).json({ error: "Failed to add item to cart" });
-//     }
-// });
-
-
-// Server Listening
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });

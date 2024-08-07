@@ -168,6 +168,7 @@ const ProductDisplay = (props) => {
                     <button onClick={increaseQuantity} disabled={quantity === product.stock}>+</button>
                     <button onClick={() => addToCart(product.id, quantity)}>ADD TO CART</button>
                     <button>Buy Now</button>
+                    <p>{product.stock>0 ? <span style={{color:"green"}}>in-stock</span> :<span style={{color:"red"}}>out of stock</span> }</p>
                 </div>
                 <p className="productdisplay-right-category"><span>Category:</span> {product.category}</p>
             </div>

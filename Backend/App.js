@@ -323,9 +323,14 @@ const Order= mongoose.model("order",{
         ref: 'Users',
         required: true,
       },
+      userName:{
+       type:String,
+       required:true
+      },
       totalproduct:{type:Number,require:true},
       total:{type:Number,required:true},
       orderProducts:{type:Object,default:{}},
+      oederProductName:{type:Object,default:{}},
       date:{type:Date,default:Date.now}
 })
 
@@ -343,14 +348,28 @@ app.post('/order', async (req, res) => {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
+        const UId= await User.findById(userId);
+        
+        for(const productId in cartData){
+
+           const proName=await Product.findOne({id:productId});
+
+            console.log(proName.name);
+            
+        }
+
+
+
         // Create an order
         const order = new Order({
             userId,
+            userName:UId.name,
             totalProduct,
-            cartData,
+            orderProducts:cartData,
             total: totalAmount
         });
         // console.log(cartData);
+
 
         // Save the order
         await order.save();
@@ -376,7 +395,6 @@ app.post('/order', async (req, res) => {
         await User.findOneAndUpdate(
             { _id: userId },
             { $set: { cartData: {} } }          //The $set operator used for replace the value 
-
 
         );
 

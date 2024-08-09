@@ -164,6 +164,7 @@
 
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import {jwtDecode} from 'jwt-decode';
 
 export const ShopContext = createContext(null);
 
@@ -180,10 +181,15 @@ const ShopContextProvider = (props) => {
     const [products, setProducts] = useState([]);
     const [all_product, setAll_product] = useState([]);
     const [cartItems, setCartItems] = useState(getDefaultCart());
+
+    const [user_Id,setUser_Id]=useState("");
+
     const [userName, setUserName] = useState('');
     const [quantity, setQuantity] = useState(1);
     const [product, setProduct] = useState([]);
     const [authToken, setAuthToken] = useState(localStorage.getItem('auth-token') || '');
+
+
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -209,6 +215,19 @@ const ShopContextProvider = (props) => {
         };
         
         fetchProducts();
+    }, [authToken]);
+
+
+       // Decode the token and set username and userId
+       useEffect(() => {
+        if (authToken) {
+            try {
+                const decodedToken = jwtDecode(authToken);
+                setUser_Id(decodedToken.user.id || ""); // Assuming the token contains a userId field
+            } catch (error) {
+                console.error('Failed to decode token:', error);
+            }
+        }
     }, [authToken]);
 
     const handleSearchChange = (event) => {
@@ -264,6 +283,16 @@ const ShopContextProvider = (props) => {
         return totalAmount;
     }
 
+    //get user's Order data using Id
+    useEffect(()=>{
+        axios.get("http://localhost:4001/getuserorder/"+user_Id)
+        .then(res=>setUserName(res.data))
+        .catch(err=>console.log(err)
+        )
+    },[user_Id])
+
+
+
     const getTotalCartItems = () => {
         let totalItem = 0;
         for (const item in cartItems) {
@@ -285,7 +314,11 @@ const ShopContextProvider = (props) => {
         searchTerm,
         handleSearchChange,
         authToken,
+        user_Id,
+        setUser_Id,
         setAuthToken,
+        setUserName,
+        userName
         // Add additional handlers if needed
     };
 

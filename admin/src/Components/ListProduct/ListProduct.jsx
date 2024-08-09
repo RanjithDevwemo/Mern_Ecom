@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import './ListProduct.css';
 import axios from 'axios'; // Import axios
-
+import { FaRegEdit } from "react-icons/fa";
 import cross_icon from '../../assets/cross_icon.png';
-
+import { Link } from 'react-router-dom';
 const ListProduct = () => {
   const [allProducts, setAllProducts] = useState([]);
 
@@ -45,6 +45,7 @@ console.log(allProducts);
         <p>New Price</p>
         <p>Category</p>
         <p>Stock</p>
+        <p>Edit</p>
         <p>Remove</p>
       </div>
 
@@ -58,6 +59,7 @@ console.log(allProducts);
             <p>$ {product.new_price}</p>
             <p>{product.category}</p>
             <p>{product.stock}</p>
+            <p className='update'><Link to={`/updateproduct/${product._id}`}>{<FaRegEdit/>}</Link></p>
             <img
               src={cross_icon}
               onClick={() => remove_product(product._id)}

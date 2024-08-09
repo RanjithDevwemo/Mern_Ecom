@@ -53,33 +53,82 @@ const Product = mongoose.model('products', {
 });
 
 // Add Product Endpoint
-app.post('/addproduct:id', async (req, res) => {
 
+app.post('/addproduct', async (req, res) => {
     try {
+        const { name, image, category, new_price, old_price, stock } = req.body;
+
+        // Basic validation
+        if (!name || !image || !category || !new_price || !old_price || !stock) {
+            return res.status(400).json({ success: false, error: "Missing required fields" });
+        }
+
+        // Generate new ID
         let products = await Product.find({});
         let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
 
+        // Create new product
         const product = new Product({
-            id: id,
-            name: req.body.name,
-            image: req.body.image,
-            category: req.body.category,
-            new_price: req.body.new_price,
-            old_price: req.body.old_price,
-            stock:req.body.stock,
+            id,
+            name,
+            image,
+            category,
+            new_price,
+            old_price,
+            stock,
         });
 
-// console.log(quantity);
-
-
-       
-        // console.log("Product Saved:", product);
-        res.json({ success: true, name: req.body.name });
+        // Save the product
+        await product.save();
+        res.json({ success: true, message: "Product added successfully", product });
     } catch (error) {
         console.error("Error adding product:", error.message);
         res.status(500).json({ success: false, error: "Failed to add product" });
     }
 });
+
+//fetch data using id
+app.get('/products/:id', async (req, res) => {
+    try {
+      const productId = req.params.id;
+  
+      // Find the product by ID
+      const product = await Product.findById(productId);
+  
+      if (!product) {
+        return res.status(404).json({ success: false, message: 'Product not found' });
+      }
+  
+      res.json({ success: true, data: product });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+  
+
+//  update a product by ID
+app.put('/updateproduct/:id', async (req, res) => {
+    try {
+      const productId = req.params.id;
+      const updateData = req.body; // Extract data from the request body
+  
+      // Find and update the product by ID
+      const updatedProduct = await Product.findByIdAndUpdate(
+        productId,
+        updateData,
+        // { new: true, runValidators: true } // Return the updated document and run validators
+      );
+  
+      if (!updatedProduct) {
+        return res.status(404).json({ success: false, message: 'Product not found' });
+      }
+  
+      res.json({ success: true, data: updatedProduct });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
 
 // Remove Product Endpoint
 app.post("/removeproduct", async (req, res) => {
@@ -166,6 +215,22 @@ app.post("/login", async (req, res) => {
         res.status(500).json({ success: false, error: "Failed to log in" });
     }
 });
+
+//get user login data
+app.get("/getname/:id", async (req,res)=>{
+
+    try{
+        let user=req.params.id;
+        let userData=await User.findById(user);
+        res.json(userData.name);
+    }catch(error){
+        console.log("not in user");
+        res.status(500).json({error:"user not found"})
+        
+    }
+
+})
+
 
 // Middleware to verify JWT token
 const fetchUser = async (req, res, next) => {
@@ -310,13 +375,11 @@ const fetchAdmin = async (req, res, next) => {
     }
 }
 
-
   
 // Order Schema
 
 
 const Order= mongoose.model("order",{
-
     
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -327,18 +390,36 @@ const Order= mongoose.model("order",{
        type:String,
        required:true
       },
-      totalproduct:{type:Number,require:true},
+      totalProduct: {
+        type: Number,
+        required: true,
+        default: 0, 
+    },
       total:{type:Number,required:true},
-      orderProducts:{type:Object,default:{}},
-      oederProductName:{type:Object,default:{}},
+    //   orderProducts:{type:Object,default:{}},
+      orderProductName:{type:Object,default:{}},
       date:{type:Date,default:Date.now}
 })
 
 
+// Total Order Product List;
+app.get('/getallorders',async (req,res)=>{
+    try{
+        let allOrders=await Order.find({});
+        res.json(allOrders);
+        console.log("Get All Oder Products are fetched");
+        
+    }catch(error){
+        console.log("Error Cannot get all orders : ",error);
+        res.status(500).json({error:"Failed to fetch all orders products"})
+    }
+})
+
+
+
+
 
 // Endpoint to handle order creation without user authentication
-
-
 app.post('/order', async (req, res) => {
     const { userId, cartData, totalProduct, totalAmount } = req.body;
 
@@ -348,28 +429,37 @@ app.post('/order', async (req, res) => {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        const UId= await User.findById(userId);
-        
-        for(const productId in cartData){
-
-           const proName=await Product.findOne({id:productId});
-
-            console.log(proName.name);
-            
+        // Find the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
         }
 
 
+        // Prepare orderProductName object
+        let orderProductName = {};
+
+        
+        // Fetch product names and build orderProductName object
+        for (const productId in cartData) {
+            const product = await Product.findOne({ id: productId });
+            if (product) {
+                orderProductName[productId] = {
+                    name: product.name,
+                    quantity: cartData[productId]
+                };
+            }
+        }
 
         // Create an order
         const order = new Order({
             userId,
-            userName:UId.name,
+            userName: user.name,
             totalProduct,
-            orderProducts:cartData,
+            // orderProducts: cartData,
+            orderProductName,
             total: totalAmount
         });
-        // console.log(cartData);
-
 
         // Save the order
         await order.save();
@@ -392,11 +482,7 @@ app.post('/order', async (req, res) => {
         }
 
         // Clear the user's cart data
-        await User.findOneAndUpdate(
-            { _id: userId },
-            { $set: { cartData: {} } }          //The $set operator used for replace the value 
-
-        );
+        await User.findByIdAndUpdate(userId, { $set: { cartData: {} } });
 
         res.json({ success: true, message: "Order placed successfully and cart cleared" });
     } catch (error) {
@@ -405,6 +491,24 @@ app.post('/order', async (req, res) => {
     }
 });
 
+
+//get user order data using userId
+
+app.get('/getuserorder/:id', async (req,res)=>{
+
+    try{
+        let usersId=req.params.id;
+
+        let userOrderData=await Order.find({userId:usersId});
+        res.json(userOrderData);
+        console.log("Get user data using UserId is success");
+        
+    }catch(error){
+        console.log("Erron connot get user data");
+     res.status(500).json({error:"Erron connot get user data"});   
+    }
+
+})
 
 
 

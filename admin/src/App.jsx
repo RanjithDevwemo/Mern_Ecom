@@ -24,6 +24,8 @@ import Admin from './Pages/Admin/Admin';
 import Navbar from './Components/NavBar/NavBar';
 import AddProduct from './Components/AddProduct/AddProduct';
 import ListProduct from './Components/ListProduct/ListProduct';
+import UpdateProduct from './Components/UpdateProduct/UpdateProduct';
+import TotalOrders from './Components/TotalOrders/TotalOrders';
 
 function App() {
     return (
@@ -36,6 +38,10 @@ function App() {
              <Route path='/admindashboard' element={<Admin/>}/>
              <Route path='/addproduct' element={<AddProduct/>}/>
              <Route path='/listproduct' element={<ListProduct/>}/>
+             <Route path='/updateproduct/:id' element={<UpdateProduct/>}/>
+             <Route path='/totalorders' element={<TotalOrders/>}/>
+
+
              {/* </Route> */}
             </Routes>
             </>

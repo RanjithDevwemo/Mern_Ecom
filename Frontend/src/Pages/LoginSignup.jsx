@@ -1,5 +1,6 @@
 import { useState } from "react";
-import "../Css/LoginSignup.css"
+import axios from "axios";
+import "../Css/LoginSignup.css";
 
 function LoginSignup() {
   const [state, setState] = useState("Login");
@@ -10,56 +11,49 @@ function LoginSignup() {
   });
 
   const changeHandler = (e) => {
-    console.log(formData);
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleLogin = async () => {
-    console.log("login clicked");
-    const res = await fetch("http://localhost:4001/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await axios.post("http://localhost:4001/login", formData);
+      const responseData = response.data;
 
-    const responseData = await res.json();
-
-    if (responseData.success) {
-      localStorage.setItem("auth-token", responseData.token);
-      console.log(responseData);
-      window.location.replace("/");
-    } else {
-      alert(responseData.error);
-      console.log(responseData);
+      if (responseData.success) {
+        localStorage.setItem("auth-token", responseData.token);
+        window.location.replace("/");
+      } else {
+        alert(responseData.error);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred during login. Please try again.");
     }
   };
 
   const handleSignup = async () => {
-    console.log("signup clicked");
-    const res = await fetch("http://localhost:4001/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await axios.post("http://localhost:4001/signup", formData);
+      const responseData = response.data;
 
-    const responseData = await res.json();
-
-    if (responseData.success) {
-      localStorage.setItem("auth-token", responseData.token);
-      console.log(responseData);
-      window.location.replace("/");
-    } else {
-      alert(responseData.error);
-      console.log(responseData);
+      if (responseData.success) {
+        localStorage.setItem("auth-token", responseData.token);
+        window.location.replace("/");
+      } else {
+        alert(responseData.error);
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert("An error occurred during signup. Please try again.");
     }
   };
 
   return (
     <div className="loginsignup">
       <div className="loginsignup-container">
-        <h1 className="">{state}</h1>
+        <h1>{state}</h1>
         <div className="loginsignup-fields">
-          {state === "Signup" ? (
+          {state === "Signup" && (
             <input
               type="text"
               placeholder="Your Name"
@@ -67,8 +61,6 @@ function LoginSignup() {
               value={formData.username}
               onChange={changeHandler}
             />
-          ) : (
-            <></>
           )}
           <input
             type="email"
@@ -90,16 +82,16 @@ function LoginSignup() {
         </button>
         {state === "Signup" ? (
           <p className="loginsignup-login" onClick={() => setState("Login")}>
-            Already have an account ? <span>Login here</span>
+            Already have an account? <span>Login here</span>
           </p>
         ) : (
           <p className="loginsignup-login" onClick={() => setState("Signup")}>
-            Don't have an account ? <span>Click here</span>
+            Don't have an account? <span>Click here</span>
           </p>
         )}
         <div className="loginsignup-agree">
-          <input type="checkbox" name="" id="" />
-          <p>By continuing, i agree to the terms of use & privacy policy.</p>
+          <input type="checkbox" id="agree" />
+          <p>By continuing, I agree to the terms of use & privacy policy.</p>
         </div>
       </div>
     </div>

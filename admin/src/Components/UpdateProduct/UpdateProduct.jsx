@@ -1,8 +1,5 @@
-
-
-
 import React, { useState } from 'react';
-import './AddProduct.css';
+import "./UpdateProduct.css"
 import upload_area from '../../assets/upload_area.svg';
 
 export default function AddProduct() {

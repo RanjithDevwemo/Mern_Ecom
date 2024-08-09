@@ -255,8 +255,16 @@ const ShopContextProvider = (props) => {
         }
     }
 
+
+
+    
+
+
+    // const removeFromCart = (itemId) => {
+    //     setCartItems(prev => ({ ...prev, [itemId]: Math.max((prev[itemId] || 0) - quantity, 0) }));
+
     const removeFromCart = (itemId) => {
-        setCartItems(prev => ({ ...prev, [itemId]: Math.max((prev[itemId] || 0) - quantity, 0) }));
+        setCartItems(prev => (0));
 
         if (authToken) {
             axios.post('http://localhost:4001/removefromcart', { itemId }, {
@@ -330,5 +338,4 @@ const ShopContextProvider = (props) => {
 }
 
 export default ShopContextProvider;
-
 

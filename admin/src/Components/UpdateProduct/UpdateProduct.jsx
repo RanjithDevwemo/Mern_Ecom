@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
-import "./UpdateProduct.css"
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+
 import upload_area from '../../assets/upload_area.svg';
 
-export default function AddProduct() {
+export default function UpdateProduct() {
+
+const {productId}=useParams();
+  console.log(productId);
   const [image, setImage] = useState(null);
   const [productDetails, setProductDetails] = useState({
     name: '',
@@ -12,6 +17,21 @@ export default function AddProduct() {
     old_price: '',
     stock: '',
   });
+
+
+  useEffect(() => {
+    // Fetch existing product details
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get(`http://localhost:4001/getproduct/${productId}`);
+        setProductDetails(response.data);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      }
+    };
+
+    fetchProduct();
+  }, [productId]);
 
   const changeHandler = (e) => {
     const { name, value } = e.target;
@@ -25,63 +45,56 @@ export default function AddProduct() {
     setImage(e.target.files[0]);
   };
 
-  const addProduct = async (e) => {
+  const updateProduct = async (e) => {
     e.preventDefault(); // Prevent default form submission
 
-    if (!image) {
-      alert('Please upload an image.');
-      return;
-    }
-
     try {
-      // Upload image
-      const formData = new FormData();
-      formData.append('product', image);
+      let imageUrl = productDetails.image; // Keep existing image if no new image is uploaded
 
-      const imageResponse = await fetch('http://localhost:4001/upload', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-        },
-        body: formData,
-      });
+      if (image) {
+        // Upload image
+        const formData = new FormData();
+        formData.append('product', image);
 
-      const imageData = await imageResponse.json();
-
-      if (imageData.success) {
-        const product = {
-          ...productDetails,
-          image: imageData.image_url,
-        };
-
-        // Add product
-        const productResponse = await fetch('http://localhost:4001/addproduct', {
-          method: 'POST',
+        const imageResponse = await axios.post('http://localhost:4001/upload', formData, {
           headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
           },
-          body: JSON.stringify(product),
         });
 
-        const productData = await productResponse.json();
-
-        if (productData.success) {
-          alert('Product Added Successfully');
-          setProductDetails({
-            name: '',
-            image: '',
-            category: 'women',
-            new_price: '',
-            old_price: '',
-            stock: '',
-          });
-          setImage(null); // Clear image preview
+        if (imageResponse.data.success) {
+          imageUrl = imageResponse.data.image_url;
         } else {
-          alert('Failed to Add Product');
+          alert('Failed to Upload Image');
+          return;
         }
+      }
+
+      // Update product
+      const updatedProduct = {
+        ...productDetails,
+        image: imageUrl,
+      };
+
+      const response = await axios.put(`http://localhost:4001/updateproduct/${productId}`, updatedProduct, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.data.success) {
+        alert('Product Updated Successfully');
+        setProductDetails({
+          name: '',
+          image: '',
+          category: 'women',
+          new_price: '',
+          old_price: '',
+          stock: '',
+        });
+        setImage(null); // Clear image preview
       } else {
-        alert('Failed to Upload Image');
+        alert('Failed to Update Product');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -90,9 +103,9 @@ export default function AddProduct() {
   };
 
   return (
-    <div className="add-product">
-      <form onSubmit={addProduct}>
-        <div className="addproduct-itemfield">
+    <div className="update-product">
+      <form onSubmit={updateProduct}>
+        <div className="updateproduct-itemfield">
           <p>Product Title</p>
           <input
             value={productDetails.name}
@@ -103,8 +116,8 @@ export default function AddProduct() {
           />
         </div>
 
-        <div className="addproduct-price">
-          <div className="addproduct-itemfield">
+        <div className="updateproduct-price">
+          <div className="updateproduct-itemfield">
             <p>Price</p>
             <input
               value={productDetails.old_price}
@@ -115,7 +128,7 @@ export default function AddProduct() {
             />
           </div>
 
-          <div className="addproduct-itemfield">
+          <div className="updateproduct-itemfield">
             <p>Offer Price</p>
             <input
               value={productDetails.new_price}
@@ -126,7 +139,7 @@ export default function AddProduct() {
             />
           </div>
 
-          <div className="addproduct-itemfield">
+          <div className="updateproduct-itemfield">
             <p>Product Stock</p>
             <input
               value={productDetails.stock}
@@ -138,11 +151,11 @@ export default function AddProduct() {
           </div>
         </div>
 
-        <div className="addproduct-itemfield">
+        <div className="updateproduct-itemfield">
           <p>Product Category</p>
           <select
             name="category"
-            className="add-product-selector"
+            className="update-product-selector"
             value={productDetails.category}
             onChange={changeHandler}
           >
@@ -152,12 +165,12 @@ export default function AddProduct() {
           </select>
         </div>
 
-        <div className="addproduct-itemfield">
+        <div className="updateproduct-itemfield">
           <label htmlFor="file-input">
             <img
-              src={image ? URL.createObjectURL(image) : upload_area}
+              src={image ? URL.createObjectURL(image) : productDetails.image || upload_area}
               alt="Upload Area"
-              className="addproduct-thumbnail-image"
+              className="updateproduct-thumbnail-image"
               height={150}
               width={150}
             />
@@ -171,8 +184,8 @@ export default function AddProduct() {
           />
         </div>
 
-        <button className="addproduct-btn" type="submit">
-          Add Product
+        <button className="updateproduct-btn" type="submit">
+          Update Product
         </button>
       </form>
     </div>

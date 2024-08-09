@@ -142,7 +142,7 @@ function Navbar() {
 
       <ul className="nav-menu">
         <li onClick={() => setMenu('userorder')}>
-          <Link to={`/userorder/${user_Id}`} style={{ textDecoration: 'none' }}>My Orders </Link>
+          <Link to={`/userorder/${user_Id}`} style={{ textDecoration: 'none' }}>myOrders </Link>
           {menu === 'userorder' && <hr />}
         </li>
       </ul>

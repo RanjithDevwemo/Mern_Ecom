@@ -280,12 +280,11 @@ app.post("/addtocart", fetchUser, async (req, res) => {
 
 
 
-
 app.post("/removefromcart", fetchUser, async (req, res) => {
     try {
         let userData = await User.findOne({ _id: req.user.id });
         if (userData.cartData[req.body.itemId] > 0) {
-            userData.cartData[req.body.itemId] -= 1;
+            userData.cartData[req.body.itemId] = 0;
             await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
             res.send("Item removed from cart");
         } else {
@@ -296,6 +295,25 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
         res.status(500).json({ error: "Failed to remove item from cart" });
     }
 });
+
+
+
+
+// app.post("/removefromcart", fetchUser, async (req, res) => {
+//     try {
+//         let userData = await User.findOne({ _id: req.user.id });
+//         if (userData.cartData[req.body.itemId] > 0) {
+//             userData.cartData[req.body.itemId] -= 1;
+//             await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
+//             res.send("Item removed from cart");
+//         } else {
+//             res.status(400).json({ error: "Item count already zero, cannot remove" });
+//         }
+//     } catch (error) {
+//         console.error("Error removing from cart:", error.message);
+//         res.status(500).json({ error: "Failed to remove item from cart" });
+//     }
+// });
 
 app.post("/getcart",fetchUser,async (req,res)=>{
     console.log("get cart sucessc");

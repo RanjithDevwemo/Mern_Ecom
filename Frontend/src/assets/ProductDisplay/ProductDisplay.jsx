@@ -166,8 +166,8 @@ const ProductDisplay = (props) => {
                         max={product.stock}
                     />
                     <button onClick={increaseQuantity} disabled={quantity === product.stock}>+</button>
-                    <button onClick={() => addToCart(product.id, quantity)}>ADD TO CART</button>
-                    <button>Buy Now</button>
+                    <button onClick={() =>(product.stock>0) ? addToCart(product.id, quantity): alert(" out of stock connot add to cart")}>ADD TO CART</button>
+                    <button >Buy Now</button>
                     <p>{product.stock>0 ? <span style={{color:"green"}}>in-stock</span> :<span style={{color:"red"}}>out of stock</span> }</p>
                 </div>
                 <p className="productdisplay-right-category"><span>Category:</span> {product.category}</p>
